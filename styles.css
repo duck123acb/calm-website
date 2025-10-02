@@ -151,3 +151,7 @@ footer {
 strong {
   font-family: JetBrainsMonoBold;
 }
+
+.circuit {
+    width: 300px;
+}
