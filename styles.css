@@ -155,3 +155,7 @@ strong {
 .circuit {
     width: 300px;
 }
+
+.column {
+    flex-direction: column;
+}
