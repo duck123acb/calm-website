@@ -152,7 +152,7 @@ strong {
   font-family: JetBrainsMonoBold;
 }
 
-.circuit {
+.circuit .parts {
     width: 300px;
 }
 
