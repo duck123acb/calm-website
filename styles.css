@@ -101,6 +101,8 @@ h2 {
   display: flex;
   align-items: center;
   flex-direction: column;
+
+  max-width: 800px;
 }
 .text:hover {
   transform: scale(1.02);
