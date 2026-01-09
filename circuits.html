@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cool Website</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Arduino Circuits</h1>
+
+      <div class="section column">
+
+          <div class="text">
+            <h2>Power Supply</h2>
+            <img class="circuit" src="images/cir1.png" alt="">
+            <p>
+              This circuit is a regulated power supply for an Arduino project, built
+              around two voltage regulators. The input comes from a DC power jack,
+              which first passes through a diode to protect against reverse polarity.
+              A 100 µF capacitor smooths the input voltage before it enters the first
+              regulator, which outputs 5V. This 5V line can be used to directly power
+              Arduino boards or other peripherals. From the 5V rail, another regulator
+              steps the voltage down further to 3.3V, filtered by capacitors (100 nF
+              each) to stabilize the output and reduce noise. Additionally, a battery
+              pack is shown as an alternative supply source. Together, these components
+              ensure that the Arduino receives clean, regulated 5V and 3.3V supplies
+              needed for its microcontroller and sensors.
+            </p>
+          </div>
+    
+          <div class="text">
+            <h2>Logic</h2>
+            <img class="circuit" src="images/cir2.png" alt="">
+            <p>
+              This circuit is built around the ATmega328P microcontroller. It includes
+              the essential components needed for the chip to operate: a 16 MHz crystal
+              oscillator with capacitors for clock stability, a reset circuit with a
+              pull-up resistor, and decoupling capacitors to ensure clean power delivery.
+              Power is supplied through the VCC and AVCC pins, while AREF provides a
+              reference voltage for analog-to-digital conversions. Communication and
+              programming are supported through UART (TX/RX pins) combined with an ICSP
+              connector and a crystal oscillator for serial communication.
+            </p>
+          </div>
+    
+          <div class="text">
+            <h2>Communications</h2>
+            <img class="circuit" src="images/cir3.png" alt="">
+            <p>
+              This circuit allows the microcontroller to connect to a computer, reset,
+              and provide feedback through LEDs. At the heart of this section is the
+              USB-to-Serial chip (ATmega16U2), which converts USB signals from the
+              computer into serial data the Arduino's main microcontroller can
+              understand. A reset circuit made up of a push button, a resistor, and a
+              transistor lets the user or computer restart the board when uploading new
+              code. A small capacitor helps filter noise so the reset signal is clean
+              and reliable. Several LEDs are also included: one shows when the board is
+              powered on, another blinks when data is being transmitted (TX), another
+              when data is received (RX), and the LED tied to pin 13 is available for
+              user testing.
+            </p>
+          </div>
+          <div class="text">
+            <h2>Top</h2>
+            <img class="circuit" src="images/arduino1.jpg" alt="">
+          </div>
+
+          <div class="text">
+            <h2>Bottom</h2>
+            <img class="circuit" src="images/arduino2.jpg" alt="">
+          </div>
+      </div>
+
+
+          
+    </main>
+
+     <footer>
+    <nav>
+        <a href="index.html">Home</a> | <a href="natural_disasters.html">Natural Disasters</a> |
+        <a href="electro_assembly.html" >Electro-Assembly</a> | <a href="circuits.html" >Circuits</a> | <a href="parts.html">Components</a> | <a href="robot_assembly.html">Robot Assembly</a> | <a href="monitor_station.html">Monitor Station</a>
+      </nav>
+      <p>&copy; why are you reading this lol</p>
+    </footer>
+  </body>
+</html>

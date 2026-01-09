@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitor Station</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Monitor Station</h1>
+      <div class="section column">
+        <div class="text">
+          <h2>Final Design Sketch</h2>
+          <!-- Paste your final design sketch here -->
+          <div class="image-grid">
+            <div class="image-item">
+              <img src="images/final_main.jpeg" alt="Final Design Sketch - Main View">
+              <p class="image-caption">Main View</p>
+            </div>
+            <div class="image-item">
+              <img src="images/final_side.jpeg" alt="Final Design Sketch - Side View">
+              <p class="image-caption">Side View</p>
+            </div>
+            <div class="image-item">
+              <img src="images/final_top.jpeg" alt="Final Design Sketch - Top View">
+              <p class="image-caption">Top View</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="text">
+          <h2>Process Flowchart</h2>
+          <!-- Paste your flowchart here -->
+          <img src="images/placeholder_flowchart.png" alt="Process Flowchart" style="width: 100%; max-width: 600px; border: 1px solid #ccc;">
+        </div>
+
+        <div class="text">
+          <h2>Commented Code</h2>
+
+          <div style="margin-bottom: 20px;">
+            <label for="codeFileSelect" style="font-weight: bold; margin-right: 10px;">Select File:</label>
+            <select id="codeFileSelect" onchange="showCode(this.value)" style="padding: 5px; font-size: 1rem;">
+              <optgroup label="Tank Drive">
+                  <option value="joystick">tBB_Joystick_Base_Code2.3.ino</option>
+                  <option value="auto_drive">auto_drive.hpp</option>
+                  <option value="controller_handling">controller_handling.hpp</option>
+                  <option value="driving">driving.hpp</option>
+                  <option value="lights">lights.hpp</option>
+                  <option value="motor_control">motor_control.hpp</option>
+              </optgroup>
+              <optgroup label="turret">
+                <option value="turret">turret.ino</option>
+              </optgroup>
+            </select>
+          </div>
+          
+          <div id="code-joystick" class="code-content">
+            <h3>tBB_Joystick_Base_Code2.3.ino</h3>
+            <pre><code>
+/**
+ * File: tBB_Joystick_Base_Code.ino
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file serves as an example for robots controlled by theBasicBot's ESP32-based controller.
+ */
+
+/* Includes ------------------------------------------------------------------------------------- */
+
+#include "controller_handling.hpp"
+#include "motor_control.hpp"
+#include "lights.hpp"
+#include "driving.hpp"
+#include "auto_drive.hpp"
+#include "servo_control.hpp"
+#include "sensors.hpp"
+
+/* Variables ------------------------------------------------------------------------------------ */
+
+static Controller controller = {};
+
+/* Setup and Loop ------------------------------------------------------------------------------- */
+
+void setup() {
+  // Setup serial
+  Serial.begin(9600);
+  Serial.print("tBB Joystick Base Code");
+  Serial.print(" | VER 2.3");
+  Serial.println(" | Mar 15, 2024");
+  // NOTE: This serial port is shared between both the BLE adapter (e.g., HM-10 module), and the
+  // Serial Monitor that is available when you connect the Arduino to a computer. This means if you
+  // print anything to the serial, it will go to BOTH the computer and the controller. This should
+  // be fine, because the controller doesn't currently parse any input over BLE.
+
+  setupMotors();
+  setupDriving();
+  setupLights();
+  setupServos();
+  setupSensors();
+}
+
+void loop() {
+  // analogWrite(kLeftWheel_Backwards, 200);
+  // delay(1000);
+  /* ---------------------------------- */
+  /*         Update Controller          */
+  /* ---------------------------------- */
+
+  controller.update();
+
+  /* ---------------------------------- */
+  /*           Control Robot            */
+  /* ---------------------------------- */
+  
+// any functions that will be called direclty by a button press must be included here
+  controlServo1(controller);
+  controlServo2(controller);
+  controlLights(controller);
+  controlMotors(controller);
+  controlAutonomous(controller);
+}
+            </code></pre>
+          </div>
+
+          <div id="code-auto_drive" class="code-content" style="display: none;">
+            <h3>auto_drive.hpp</h3>
+            <pre><code>
+#pragma once
+/**
+ * File: auto_drive.hpp
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file contains code needed to create an autonomous driving function based on time delays.
+ */
+
+/* Includes ------------------------------------------------------------------------------------- */
+
+#include "controller_handling.hpp"
+#include "driving.hpp"
+
+/* Constants ------------------------------------------------------------------------------------ */
+
+/* Variables ------------------------------------------------------------------------------------ */
+
+static boolean isRunningAuto = false;
+/* Functions ------------------------------------------------------------------------------------ */
+
+// autoStart functon flashes the lights 4 times before the runAutomomous function runs as a warning
+void autoStart (){
+  for (int x = 1; x <= 4; x++){
+    lightsOn();
+    delay (250);
+    lightsOff();
+    delay (250);
+  }
+}
+
+void autoDrive() {
+  Serial.println ("Auto Driving");
+  autoStart();
+  setMotorLimit(50);
+  driveForward();
+  delay(3000);
+  turnRight();
+  delay(1000);
+  setMotorLimit(80);
+  driveBackwards();
+  delay(2000);
+  turnLeft();
+  delay(750);
+  stopDriving();
+  delay(200);
+
+  setFastMode();
+}
+
+void controlAutonomous(const Controller& aController) {
+  unsigned long currentTime = millis();
+  if (aController.btnMidLeft && !isRunningAuto) {
+    isRunningAuto = true;
+    autoDrive();
+  } else if (!aController.btnMidLeft && isRunningAuto) {
+    isRunningAuto = false;
+  }
+}
+            </code></pre>
+          </div>
+
+          <div id="code-controller_handling" class="code-content" style="display: none;">
+            <h3>controller_handling.hpp</h3>
+            <pre><code>
+#pragma once
+/**
+ * File: controller_handling.hpp
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file contains the class definition of a controller object, and defines the methods to handle
+ * data received from the controller over BLE.
+ */
+
+/* Config --------------------------------------------------------------------------------------- */
+
+/**
+ * @brief Uncomment this macro to enable debugging features. These can help you figure out if
+ * anything is going wrong, but may reduce the performance of the program.
+ */
+// #define DEBUG
+
+/* Types ---------------------------------------------------------------------------------------- */
+
+class Controller {
+ protected:
+  static constexpr size_t kMessageSize_B = 7;
+
+  uint8_t rxBuffer[kMessageSize_B] = {};
+  size_t numRxBytes = 0;
+
+  static constexpr uint8_t kJoystickMinimum = 0;
+  static constexpr uint8_t kJoystickMiddle = 127;
+  static constexpr uint8_t kJoystickMaximum = 254;
+
+  // Increase this slightly if the robot is driving (or its motors are whining) without moving the
+  // joystick
+  static constexpr uint8_t kJoystickDeadzone = 25;
+
+  int8_t parseJoystickValue(const uint8_t aAxis) {
+    if (aAxis <= kJoystickMiddle - kJoystickDeadzone) {
+      return map(aAxis, kJoystickMinimum, kJoystickMiddle + kJoystickDeadzone, -100, 0);
+    } else if (aAxis >= kJoystickMiddle + kJoystickDeadzone) {
+      return map(aAxis, kJoystickMiddle + kJoystickDeadzone, kJoystickMaximum, 0, 100);
+    } else {
+      return 0;
+    }
+  }
+
+ public:
+  /* ---------------------------------- */
+  /*    Basic + Advanced Controller     */
+  /* ---------------------------------- */
+
+  // Right button bank
+  boolean btnRightUp;
+  boolean btnRightRight;
+  boolean btnRightDown;
+  boolean btnRightLeft;
+
+  // Middle button bank
+  boolean btnMidLeft;
+  boolean btnMidRight;
+
+  // Left joystick
+  int8_t joyLeftX;  // -100 to +100 (left to right)
+  int8_t joyLeftY;  // -100 to +100 (down to up)
+  boolean btnLeftJoy;
+
+  /* ---------------------------------- */
+  /*      Advanced Controller Only      */
+  /* ---------------------------------- */
+
+  // Left button bank
+  boolean btnLeftUp;
+  boolean btnLeftRight;
+  boolean btnLeftDown;
+  boolean btnLeftLeft;
+
+  // Shoulder buttons
+  boolean btnLeftShoulder;
+  boolean btnRightShoulder;
+
+  // Right joystick
+  int8_t joyRightX;  // -100 to +100 (left to right)
+  int8_t joyRightY;  // -100 to +100 (down to up)
+  boolean btnRightJoy;
+
+  void update() {
+    // Collect individual bytes over BLE until a full message is received
+    if (numRxBytes != kMessageSize_B) {
+      while (Serial.available() > 0) {
+        uint8_t rxByte = Serial.read();
+
+        if (numRxBytes == 0 && rxByte != 0xFF) {
+          // Ignore input until we see the start of a message
+        } else if (numRxBytes < kMessageSize_B) {
+          // Append the byte to the message buffer
+          rxBuffer[numRxBytes++] = rxByte;
+        } else {
+          // We've somehow received too many bytes between start bytes.
+          // Clear the buffer and try again.
+          memset(rxBuffer, 0, sizeof(rxBuffer));
+          numRxBytes = 0;
+        }
+      }
+      delay(8);
+    } else {
+#ifdef DEBUG
+      // Print received message to the console
+      char s[48] = {0};
+      snprintf(s, 47, "RX: [0x%02x][0x%02x][0x%02x][0x%02x][0x%02x][0x%02x][0x%02x]\n", rxBuffer[0],
+               rxBuffer[1], rxBuffer[2], rxBuffer[3], rxBuffer[4], rxBuffer[5], rxBuffer[6]);
+      Serial.println(s);
+#endif
+
+      // Update the member variables to reflect the current state of the controller
+      btnLeftShoulder = (rxBuffer[1] & 0x01);
+      btnRightShoulder = (rxBuffer[1] & 0x02);
+      btnMidLeft = (rxBuffer[1] & 0x04);
+      btnMidRight = (rxBuffer[1] & 0x08);
+      btnRightJoy = (rxBuffer[1] & 0x10);
+      btnLeftJoy = (rxBuffer[1] & 0x20);
+
+      btnLeftUp = (rxBuffer[2] & 0x01);
+      btnLeftRight = (rxBuffer[2] & 0x02);
+      btnLeftDown = (rxBuffer[2] & 0x04);
+      btnLeftLeft = (rxBuffer[2] & 0x08);
+      btnRightUp = (rxBuffer[2] & 0x10);
+      btnRightRight = (rxBuffer[2] & 0x20);
+      btnRightDown = (rxBuffer[2] & 0x40);
+      btnRightLeft = (rxBuffer[2] & 0x80);
+
+      joyLeftX = parseJoystickValue(rxBuffer[3]);
+      joyLeftY = parseJoystickValue(rxBuffer[4]);
+      joyRightX = parseJoystickValue(rxBuffer[5]);
+      joyRightY = parseJoystickValue(rxBuffer[6]);
+
+      // Serial.print("joyLeftX = ");
+      // Serial.println(joyLeftX);
+      // Serial.print("joyLeftY = ");
+      // Serial.println(joyLeftY);
+
+
+      // Clear the message buffer to make room for the next message
+      memset(rxBuffer, 0, sizeof(rxBuffer));
+      numRxBytes = 0;
+    }
+  }
+};
+            </code></pre>
+          </div>
+
+          <div id="code-driving" class="code-content" style="display: none;">
+            <h3>driving.hpp</h3>
+            <pre><code>
+#pragma once
+/**
+ * File: driving.hpp
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file contains functions to map a controller's joystick(s) for driving the Basic Bot.
+ * The tank drive mode requires 2 joysticks, so it can only be used with the Advanced Controller.
+ */
+
+/* Config --------------------------------------------------------------------------------------- */
+
+/**
+ * @brief Uncomment this macro to enable "Tank Drive" mode. If left comment out, the robot will
+ * remain in the default "Single Joystick Drive" mode.
+ *
+ * @remark "Tank Drive" mode requires a controller with 2 joysticks, which would mean a tBB Advanced
+ * controller, but not a tBB Basic controller.
+ */
+ 
+//#define TANK_DRIVE
+
+/* Includes ------------------------------------------------------------------------------------- */
+
+#include "controller_handling.hpp"
+#include "motor_control.hpp"
+
+/* Constants ------------------------------------------------------------------------------------ */
+
+static constexpr int kFastModeMotorPercent = 100;
+static constexpr int kSlowModeMotorPercent = 50;
+
+static constexpr unsigned long kSpeedToggleDebounceDelayMs = 100;
+
+/* Variables ------------------------------------------------------------------------------------ */
+
+static boolean isFastModeEnabled = true;
+static boolean wasSpeedToggleBtnPressed = false;
+static unsigned long lastSpeedToggleButtonTime = 0;
+
+/* Functions ------------------------------------------------------------------------------------ */
+
+void singleJoystickDrive(const Controller& aController) {
+  if (aController.joyLeftY >= 0) {
+    if (aController.joyLeftX >= 0) {
+      setLeftMotor(min(aController.joyLeftY + aController.joyLeftX, 100));
+      setRightMotor(aController.joyLeftY - aController.joyLeftX);
+    } else if (aController.joyLeftX < 0) {
+      setLeftMotor(aController.joyLeftY + aController.joyLeftX);
+      setRightMotor(min(aController.joyLeftY - aController.joyLeftX, 100));
+    }
+  } else if (aController.joyLeftY < 0) {
+    if (aController.joyLeftX >= 0) {
+      setLeftMotor(aController.joyLeftY + aController.joyLeftX);
+      setRightMotor(max(aController.joyLeftY - aController.joyLeftX, -100));
+    } else if (aController.joyLeftX < 0) {
+      setLeftMotor(max(aController.joyLeftY + aController.joyLeftX, -100));
+      setRightMotor(aController.joyLeftY - aController.joyLeftX);
+    }
+  }
+}
+
+void tankDrive(const Controller& aController) {
+  setLeftMotor(aController.joyLeftY);
+  setRightMotor(aController.joyLeftY);
+}
+
+void setFastMode() {
+  setMotorLimit(kFastModeMotorPercent);
+  isFastModeEnabled = true;
+  Serial.println("Fast Mode");
+}
+
+void setSlowMode() {
+  setMotorLimit(kSlowModeMotorPercent);
+  isFastModeEnabled = false;
+  Serial.println("Slow Mode");
+}
+
+void toggleMotorSpeed() {
+  if (isFastModeEnabled) {
+    setSlowMode();
+  } else {
+    setFastMode();
+  }
+}
+
+void setupDriving() { setFastMode(); }
+
+void controlMotors(const Controller& aController) {
+  unsigned long currentTime = millis();
+  if (aController.btnLeftJoy && !wasSpeedToggleBtnPressed &&
+      currentTime - lastSpeedToggleButtonTime > kSpeedToggleDebounceDelayMs) {
+    lastSpeedToggleButtonTime = millis();
+    wasSpeedToggleBtnPressed = true;
+    toggleMotorSpeed();
+  } else if (!aController.btnLeftJoy) {
+    wasSpeedToggleBtnPressed = false;
+  }
+
+#ifdef TANK_DRIVE
+  /* ---------------------------------- */
+  /*             TANK DRIVE             */
+  /* ---------------------------------- */
+  tankDrive(aController);
+#else
+  /* ---------------------------------- */
+  /*        SINGLE JOYSTICK DRIVE       */
+  /* ---------------------------------- */
+  singleJoystickDrive(aController);
+#endif
+}
+
+  /* ---------------------------------- */
+  /*        Auto Drive Functions        */
+  /* ---------------------------------- */
+void driveForward() {
+  setLeftMotor(100);
+  setRightMotor(100);
+}
+
+void driveBackwards() {
+  setLeftMotor(-100);
+  setRightMotor(-100);
+}
+
+void stopDriving() {
+  setLeftMotor(0);
+  setRightMotor(0);
+}
+
+void turnRight() {
+  setLeftMotor(-100);
+  setRightMotor(100);
+}
+
+void turnLeft() {
+  setLeftMotor(100);
+  setRightMotor(-100);
+}
+            </code></pre>
+          </div>
+                 <div id="code-lights" class="code-content" style="display: none;">
+            <h3>lights.hpp</h3>
+            <pre><code>
+#pragma once
+/**
+ * File: lights.hpp
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file contains functions to control both the arm and paddle servos of the robot.
+ */
+
+/* Includes ------------------------------------------------------------------------------------- */
+
+#include "controller_handling.hpp"
+
+/* Constants ------------------------------------------------------------------------------------ */
+
+// Lights configuration
+static constexpr int kPinLightLeft = 4;
+static constexpr int kPinLightRight = 13;
+
+static constexpr unsigned long kToggleDebounceDelayMs = 100;
+
+/* Variables ------------------------------------------------------------------------------------ */
+
+static boolean areLightsOn = false;
+static boolean wasToggleBtnPressed = false;
+static unsigned long lastToggleButtonTime = 0;
+
+/* Functions ------------------------------------------------------------------------------------ */
+
+void lightsOn() {
+  digitalWrite(kPinLightLeft, HIGH);
+  digitalWrite(kPinLightRight, HIGH);
+  areLightsOn = true;
+  Serial.println("Lights On");
+}
+
+void lightsOff() {
+  digitalWrite(kPinLightLeft, LOW);
+  digitalWrite(kPinLightRight, LOW);
+  areLightsOn = false;
+  Serial.println("Lights Off");
+}
+
+void lightsToggle() {
+  if (areLightsOn) {
+    lightsOff();
+  } else {
+    lightsOn();
+  }
+}
+
+void setupLights() {
+  pinMode(kPinLightLeft, OUTPUT);
+  pinMode(kPinLightRight, OUTPUT);
+  lightsOff();
+}
+
+void controlLights(const Controller& aController) {
+  unsigned long currentTime = millis();
+  if (aController.btnMidRight && !wasToggleBtnPressed &&
+      currentTime - lastToggleButtonTime > kToggleDebounceDelayMs) {
+    lastToggleButtonTime = millis();
+    wasToggleBtnPressed = true;
+    lightsToggle();
+  } else if (!aController.btnMidRight) {
+    wasToggleBtnPressed = false;
+  }
+}
+            </code></pre>
+          </div>
+
+         <div id="code-motor_control" class="code-content" style="display: none;">
+            <h3>motor_control.hpp</h3>
+            <pre><code>
+#pragma once
+/**
+ * File: motor_control.hpp
+ * Author: Matthew Allwright, theBasicBot
+ * Copyright: 2023
+ *
+ * Description:
+ * This file contains constants and functions for controlling motors on the robot.
+ */
+
+/* Includes ------------------------------------------------------------------------------------- */
+
+#include "controller_handling.hpp"
+
+/* Constants ------------------------------------------------------------------------------------ */
+
+// Motor control pins connected to H-Bridge motor driver
+static constexpr int kLeftWheel_Backwards = 3;
+static constexpr int kLeftWheel_Forwards = 5;
+static constexpr int kRightWheel_Forwards = 6;
+static constexpr int kRightWheel_Backwards = 11;
+
+// Adjust either of these down (NOT ABOVE 255) if one motor is faster than the other
+static constexpr unsigned int kMotorMaximum_Left = 255;
+static constexpr unsigned int kMotorMaximum_Right = 255;
+
+// Motor control configuration
+static constexpr int kMotorMaxPercent = 100;
+
+/* Variables ------------------------------------------------------------------------------------ */
+
+static double motorLimitFactor = kMotorMaxPercent / 100.0f;
+
+/* Functions ------------------------------------------------------------------------------------ */
+
+void setupMotors() {
+  pinMode(kRightWheel_Backwards, OUTPUT);
+  pinMode(kRightWheel_Forwards, OUTPUT);
+  pinMode(kLeftWheel_Forwards, OUTPUT);
+  pinMode(kLeftWheel_Backwards, OUTPUT);
+}
+
+void setMotorLimit(const unsigned int aMax) {
+  if (aMax <= kMotorMaxPercent) {
+    motorLimitFactor = aMax / 100.0f;
+  } else {
+    motorLimitFactor = kMotorMaxPercent / 100.0f;
+  }
+}
+
+void setLeftMotor(const int aValue) {
+  int motorVal = max(min(aValue, kMotorMaxPercent), -kMotorMaxPercent);
+
+  if (motorVal > 0) {
+    analogWrite(kLeftWheel_Forwards,
+                map(motorVal, 0, kMotorMaxPercent, 0, kMotorMaximum_Left * motorLimitFactor));
+    analogWrite(kLeftWheel_Backwards, 0);
+  } else if (motorVal < 0) {
+    analogWrite(kLeftWheel_Forwards, 0);
+    analogWrite(kLeftWheel_Backwards,
+                map(motorVal, 0, -kMotorMaxPercent, 0, kMotorMaximum_Left * motorLimitFactor));
+  } else {
+    analogWrite(kLeftWheel_Forwards, 0);
+    analogWrite(kLeftWheel_Backwards, 0);
+  }
+}
+
+void setRightMotor(const int aValue) {
+  int motorVal = max(min(aValue, kMotorMaxPercent), -kMotorMaxPercent);
+
+  if (motorVal > 0) {
+    analogWrite(kRightWheel_Forwards,
+                map(motorVal, 0, kMotorMaxPercent, 0, kMotorMaximum_Right * motorLimitFactor));
+    analogWrite(kRightWheel_Backwards, 0);
+    Serial.println(motorVal);
+  } else if (motorVal < 0) {
+    analogWrite(kRightWheel_Forwards, 0);
+    analogWrite(kRightWheel_Backwards,
+                map(motorVal, 0, -kMotorMaxPercent, 0, kMotorMaximum_Right * motorLimitFactor));
+  } else {
+    analogWrite(kRightWheel_Forwards, 0);
+    analogWrite(kRightWheel_Backwards, 0);
+  }
+}
+            </code></pre>
+          </div>
+
+        <div id="code-turret" class="code-content" style="display: none;">
+            <h3>turret.hpp</h3>
+            <pre><code>
+#define trigPin     8
+#define echoPin     9
+
+#define motorLeft1  2
+#define motorLeft2  3
+#define enableLeft  13  // PWM pin
+
+#define motorRight1 5
+#define motorRight2 6
+#define enableRight 12  // <- use a PWM pin, e.g. 10
+
+void setup() {
+  Serial.begin(9600); // Initialize serial communication for debugging
+
+  // Set sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  // Set motor pins
+  pinMode(motorLeft1, OUTPUT);
+  pinMode(motorLeft2, OUTPUT);
+  pinMode(enableLeft, OUTPUT);
+
+  pinMode(motorRight1, OUTPUT);
+  pinMode(motorRight2, OUTPUT);
+  pinMode(enableRight, OUTPUT);
+}
+
+void loop() {
+  long duration, distance;
+
+  // Clear the trigger pin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  // Set the trigger pin high for 10 microseconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Measure the duration of the echo pulse
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in centimeters
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Obstacle avoidance logic
+  if (distance < 30 && distance > 1) { // If obstacle is closer than 20 cm
+    stopCar();
+    backwardCar();
+    delay(500); // Wait a bit
+
+    turnLeft(); // Turn to avoid
+    delay(800); // Turn for 1 second
+    forwardCar(); // Resume forward movement
+  } else {
+    forwardCar(); // No obstacle, move forward
+  }
+
+  // Serial.println(analogRead(0));
+  // Serial.println(analogRead(enableLeft));
+  // Serial.println(analogRead(enableRight));
+  // Serial.println(analogRead(13));
+
+}
+
+// Functions for car movement
+void forwardCar() {
+  digitalWrite(motorLeft1, HIGH);
+  digitalWrite(motorLeft2, LOW);
+  analogWrite(enableLeft, 200); // Set speed (0-255)
+
+  digitalWrite(motorRight1, HIGH);
+  digitalWrite(motorRight2, LOW);
+  analogWrite(enableRight, 200);
+}
+void backwardCar() {
+  digitalWrite(motorLeft1, LOW);
+  digitalWrite(motorLeft2, HIGH);
+  analogWrite(enableLeft, 200); // Set speed (0-255)
+
+  digitalWrite(motorRight1, LOW);
+  digitalWrite(motorRight2, HIGH);
+  analogWrite(enableRight, 200);
+}
+
+void stopCar() {
+  digitalWrite(motorLeft1, LOW);
+  digitalWrite(motorLeft2, LOW);
+  analogWrite(enableLeft, 0);
+
+  digitalWrite(motorRight1, LOW);
+  digitalWrite(motorRight2, LOW);
+  analogWrite(enableRight, 0);
+}
+
+void turnRight() {
+  digitalWrite(motorLeft1, HIGH);
+  digitalWrite(motorLeft2, LOW);
+  analogWrite(enableLeft, 150); // Left wheel forward
+
+  digitalWrite(motorRight1, LOW);
+  digitalWrite(motorRight2, HIGH);
+  analogWrite(enableRight, 150); // Right wheel backward (to turn right)
+}
+
+void turnLeft() {
+  digitalWrite(motorLeft1, LOW);
+  digitalWrite(motorLeft2, HIGH);
+  analogWrite(enableLeft, 150); // Left wheel backward
+
+  digitalWrite(motorRight1, HIGH);
+  digitalWrite(motorRight2, LOW);
+  analogWrite(enableRight, 150); // Right wheel forward (to turn left)
+}            </code></pre>
+          </div>
+        </div>
+
+        <div class="text">
+          <h2>Picture of Rover</h2>
+          <!-- Take a picture of your rover in action -->
+          <img src="images/placeholder_rover.png" alt="Picture of Rover" style="width: 100%; max-width: 600px; border: 1px solid #ccc;">
+        </div>
+
+        <div class="text">
+          <h2>Opportunities for Improvement</h2>
+          <p>
+            <!-- List one main thing you would improve on your rover -->
+            [Placeholder: List one main thing you would improve on your rover if you had more time and/or resources]
+          </p>
+        </div>
+
+        <div class="text">
+          <h2>Contributions to Your Team</h2>
+          <p>
+            <!-- Describe your main contributions -->
+            [Placeholder: In 2-3 sentences describe your main contributions to your team throughout this project]
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <nav>
+        <a href="index.html">Home</a> |
+        <a href="natural_disasters.html">Natural Disasters</a> |
+        <a href="electro_assembly.html">Electro-Assembly</a> |
+        <a href="circuits.html">Circuits</a> |
+        <a href="parts.html">Components</a> |
+        <a href="robot_assembly.html">Robot Assembly</a> |
+        <a href="monitor_station.html">Monitor Station</a>
+      </nav>
+      <p>&copy; why are you reading this lol</p>
+    </footer>
+  </body>
+
+  <script>
+    function showCode(fileId) {
+      // Hide all code sections
+      const sections = document.querySelectorAll('.code-content');
+      sections.forEach(section => section.style.display = 'none');
+      
+      // Show the selected section
+      const selected = document.getElementById('code-' + fileId);
+      if (selected) {
+        selected.style.display = 'block';
+      }
+    }
+  </script>
+</html>

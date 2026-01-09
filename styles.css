@@ -1,0 +1,192 @@
+@font-face {
+  font-family: JetBrainsMono;
+  src: url(assets/JetBrainsMono-SemiBold.ttf);
+}
+@font-face {
+  font-family: JetBrainsMonoBold;
+  src: url(assets/JetBrainsMono-ExtraBold.ttf);
+}
+
+@keyframes moveBackground {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: var(--bg-sizing) var(--bg-sizing), var(--bg-sizing) var(--bg-sizing);
+  }
+}
+
+@keyframes colourChange {
+  0% { color: red; text-shadow: 0 0 5px red; }
+  14% { color: orange; text-shadow: 0 0 5px orange; }
+  28% { color: yellow; text-shadow: 0 0 5px yellow; }
+  42% { color: green; text-shadow: 0 0 5px green; }
+  56% { color: aquamarine; text-shadow: 0 0 5px aquamarine; }
+  70% { color: blue; text-shadow: 0 0 5px blue; }
+  85% { color: indigo; text-shadow: 0 0 5px indigo; }
+  100% { color: violet; text-shadow: 0 0 5px violet; }
+}
+
+:root {
+  --bg: #0a090c;
+  --bg-secondary: #07393c;
+  --text: #f0edee;
+
+  --bg-sizing: 25px;
+  --bg-lines-thickness: 24px; /* usually gonna be 1px less that the bg sizing */
+
+  --document-padding: 1em;
+
+  font-family: JetBrainsMono;
+}
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--text);
+
+  /* cool grid */
+  background-color: var(--bg);
+  /* background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent var(--bg-lines-thickness),
+      var(--bg-secondary) var(--bg-sizing)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent var(--bg-lines-thickness),
+      var(--bg-secondary) var(--bg-sizing)
+    );
+  background-size: 1px, 1px;
+  animation: moveBackground 120s linear infinite; */
+}
+main {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  padding: var(--document-padding) var(--document-padding);
+}
+
+h1, h2, h3 {
+  color: #fff;
+  text-shadow: 0 0 10px #00f0f0;
+}
+h1 {
+  font-size: 75px;
+}
+h2 {
+  font-size: 50px;
+}
+
+/* contains the different text divs */
+.section {
+  display: flex;
+  gap: 20px;
+}
+.text {
+  flex: 1 1 calc(33.33% - 20px);
+  background-color: rgba(144, 221, 240, 0.2);
+  padding: 1rem;
+  border-radius: 1.5rem;
+
+  transition: 200ms;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  max-width: 800px;
+}
+.text:hover {
+  transform: scale(1.02);
+}
+
+.text-t {
+  margin: 0em 10em 5em 10em;
+}
+
+a:link {
+  color: #ff5555;
+}
+a:visited {
+  color: #ff6565;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  font-size: 20px;
+}
+
+th,
+td {
+  border: 1px ghostwhite solid; /* Add a 1px black border to all cells */
+  padding: 10px; /* Add padding for better readability */
+}
+
+footer {
+  padding-bottom: var(--document-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rainbow {
+  animation: colourChange 1.25s infinite;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.calendar {
+  width: 500px;
+}
+
+strong {
+  font-family: JetBrainsMonoBold;
+}
+
+.circuit {
+    width: 300px;
+}
+.parts {
+    width: 300px;
+}
+
+.column {
+    flex-direction: column;
+}
+
+.image-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+gap: 20px;
+margin-top: 20px;
+}
+.image-item {
+text-align: center;
+background: var(--bg);
+padding: 10px;
+border-radius: 8px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.image-item img {
+width: 100%;
+height: auto;
+border-radius: 4px;
+object-fit: cover;
+}
+.image-caption {
+margin-top: 8px;
+font-weight: bold;
+color: var(--text);
+}
+      
