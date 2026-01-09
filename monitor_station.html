@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Monitor Station</title>
     <link rel="stylesheet" href="styles.css" />
+
+    <script defer>
+    function showCode(fileId) {
+      // Hide all code sections
+      const sections = document.querySelectorAll('.code-content');
+      sections.forEach(section => section.style.display = 'none');
+      
+      // Show the selected section
+      const selected = document.getElementById('code-' + fileId);
+      if (selected) {
+        selected.style.display = 'block';
+      }
+    }
+  </script>
   </head>
   <body>
     <main>
@@ -823,18 +837,4 @@ void turnLeft() {
       <p>&copy; why are you reading this lol</p>
     </footer>
   </body>
-
-  <script>
-    function showCode(fileId) {
-      // Hide all code sections
-      const sections = document.querySelectorAll('.code-content');
-      sections.forEach(section => section.style.display = 'none');
-      
-      // Show the selected section
-      const selected = document.getElementById('code-' + fileId);
-      if (selected) {
-        selected.style.display = 'block';
-      }
-    }
-  </script>
 </html>
